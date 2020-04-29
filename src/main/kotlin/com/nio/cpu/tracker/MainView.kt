@@ -2,6 +2,8 @@ package com.nio.cpu.tracker
 
 import com.nio.cpu.tracker.data.TopGroup
 import com.nio.cpu.tracker.data.TopItem
+import com.nio.cpu.tracker.view.SelectFileView
+import com.nio.cpu.tracker.view.SelectGroupView
 import javafx.beans.property.StringProperty
 import javafx.scene.Parent
 import javafx.scene.chart.CategoryAxis
@@ -13,13 +15,12 @@ import javafx.scene.paint.Color
 import tornadofx.*
 import tornadofx.Stylesheet.Companion.button
 
-class MainView() : View() {
+class MainView : View() {
     override val root = borderpane {
         left<LeftView>()
-        top<TopView>()
+        top<SelectFileView>()
         right<RightView>()
         bottom<BottomView>()
-
         center<Chartview>()
     }
 
@@ -40,20 +41,17 @@ class LeftView: View() {
 }
 
 class TopView: View() {
-    override val root = label("Top View") {
-        useMaxWidth = true
-        style {
-            backgroundColor += Color.ALICEBLUE
-
-        }
+    override val root = form {
+        textfield("")
     }
 }
 
 class RightView: View() {
-        override val root = label("Right View") {
-            useMaxWidth = true
+        override val root = borderpane {
+            minWidth = 300.0
+            center<SelectGroupView>()
             style {
-                backgroundColor += Color.WHITE
+                backgroundColor += Color.GREEN
             }
         }
 }
