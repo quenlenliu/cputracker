@@ -1,5 +1,7 @@
 package com.nio.cpu.tracker
 
+import com.nio.cpu.tracker.data.TopGroup
+import com.nio.cpu.tracker.data.TopItem
 import javafx.beans.property.StringProperty
 import javafx.scene.Parent
 import javafx.scene.chart.CategoryAxis
@@ -108,6 +110,8 @@ class Chartview : View("Charts") {
                         data("Mar", 27)
                     }
                 }
+
+
                 stackedbarchart("Stock again", CategoryAxis(), NumberAxis()) {
                     series("Portfolio 1") {
                         data("Jan", 23)
@@ -120,15 +124,24 @@ class Chartview : View("Charts") {
                         data("Mar", 27)
                     }
                 }
-                linechart("linechart", CategoryAxis(), NumberAxis()) {
-                    series("month") {
-                        data("jan", 10)
-                        data("feb", 20)
-                        data("mar", 5)
+                var result = ArrayList<TopItem>()
+                for (index in  1 until 50) {
+                    val item = TopItem(1, "com.nio.navi", index, "index_" + index, 100, 200, 50.0f + (Math.random() * 20).toFloat(), index.toLong())
+                    result.add(item)
+                }
+
+                val group = TopGroup.group(result, "com.nio.navi")
+
+                linechart("CPU占用", CategoryAxis(), NumberAxis()) {
+                    series("com.nio.navi") {
+                        for (item in group.group) {
+                            data(item.updateTime.toString(), item.cpuPercent)
+                        }
                     }
                     series("week") {
-                        data("jan", 1)
-                        data("feb", 2)
+                            data("1", 20)
+                            data("10", 30)
+
                     }
                 }
             }
