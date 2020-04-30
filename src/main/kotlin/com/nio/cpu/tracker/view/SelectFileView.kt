@@ -1,12 +1,18 @@
 package com.nio.cpu.tracker.view
 
+import com.nio.cpu.tracker.data.TopItem
+import com.nio.cpu.tracker.parser.ParseListener
+import com.nio.cpu.tracker.parser.ProcessParser
+import com.nio.cpu.tracker.parser.TopParser
+import com.nio.cpu.tracker.presenter.MainPresenter
 import javafx.geometry.Pos
 import javafx.scene.Parent
 import javafx.stage.FileChooser
 import tornadofx.*
 import java.io.File
 
-class SelectFileView: View("SelectFile") {
+class SelectFileView(private val presenter: MainPresenter): View("SelectFile") {
+
     override val root = hbox {
         style {
             alignment = Pos.CENTER
@@ -28,15 +34,20 @@ class SelectFileView: View("SelectFile") {
             }
         }
 
-
         button("开始解析") {
             action {
                 val file = File(filePath.text.trim())
                 if (isValidFilePath(file)) {
                     println("Start parse: " + file.absolutePath)
+                    val parser = ProcessParser(filePath.text.trim(), presenter)
+                    runAsync {
+                        parser.startParse()
+                    }
+
                 } else {
                     println("File error, can't parse!!!!!!!!!!!")
                 }
+
             }
         }
     }

@@ -2,26 +2,26 @@ package com.nio.cpu.tracker
 
 import com.nio.cpu.tracker.data.TopGroup
 import com.nio.cpu.tracker.data.TopItem
+import com.nio.cpu.tracker.presenter.MainPresenter
 import com.nio.cpu.tracker.view.SelectFileView
 import com.nio.cpu.tracker.view.SelectGroupView
-import javafx.beans.property.StringProperty
-import javafx.scene.Parent
 import javafx.scene.chart.CategoryAxis
+import javafx.scene.chart.LineChart
 import javafx.scene.chart.NumberAxis
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
+import javafx.scene.layout.BorderPane
 import javafx.scene.layout.GridPane
 import javafx.scene.paint.Color
 import tornadofx.*
-import tornadofx.Stylesheet.Companion.button
 
 class MainView : View() {
+    private val presenter = MainPresenter(this)
+    private val chartView = ChartView()
+    private val selectFileView = SelectFileView(presenter)
     override val root = borderpane {
-        left<LeftView>()
-        top<SelectFileView>()
+        top = selectFileView.root
         right<RightView>()
         bottom<BottomView>()
-        center<Chartview>()
+        center = chartView.root
     }
 
     init {
@@ -29,20 +29,9 @@ class MainView : View() {
         root.minWidth = 800.0
         root.minHeight = 600.0
     }
-}
 
-class LeftView: View() {
-    override val root = label("Left View") {
-        useMaxWidth = true
-        style {
-            backgroundColor += Color.RED
-        }
-    }
-}
-
-class TopView: View() {
-    override val root = form {
-        textfield("")
+    fun updateChartView(data: TopGroup) {
+        chartView.updateData(data)
     }
 }
 
@@ -65,124 +54,25 @@ class BottomView: View() {
     }
 }
 
-class CenterView:View() {
-    override val root = form {
-            fieldset {
-
-                textfield("input")
-
-                button("Commit") {
-                    action {
-
-                    }
-                }
-
-                Chartview()
-            }
-        }
-
-}
-
-class Chartview : View("Charts") {
-    override val root = GridPane()
+class ChartView : View("Charts") {
+    override val root = BorderPane()
+    lateinit var lineChart: LineChart<String, Number>;
 
     init {
+
+    }
+
+    fun updateData(data: TopGroup) {
         with(root) {
-            row() {
-                piechart("Imported Fruits") {
-                    data("Grapefruit", 12.0)
-                    data("Oranges", 25.0)
-                    data("Plums", 10.0)
-                    data("Pears", 22.0)
-                    data("Apples", 30.0)
-                }
-                barchart("Stock Monitoring, 2010", CategoryAxis(), NumberAxis()) {
-                    series("Portfolio 1") {
-                        data("Jan", 23)
-                        data("Feb", 14)
-                        data("Mar", 15)
-                    }
-                    series("Portfolio 2") {
-                        data("Jan", 11)
-                        data("Feb", 19)
-                        data("Mar", 27)
-                    }
-                }
-
-
-                stackedbarchart("Stock again", CategoryAxis(), NumberAxis()) {
-                    series("Portfolio 1") {
-                        data("Jan", 23)
-                        data("Feb", 14)
-                        data("Mar", 15)
-                    }
-                    series("Portfolio 2") {
-                        data("Jan", 11)
-                        data("Feb", 19)
-                        data("Mar", 27)
-                    }
-                }
-                var result = ArrayList<TopItem>()
-                for (index in  1 until 50) {
-                    val item = TopItem(1, "com.nio.navi", index, "index_" + index, 100, 200, 50.0f + (Math.random() * 20).toFloat(), index.toLong())
-                    result.add(item)
-                }
-
-                val group = TopGroup.group(result, "com.nio.navi")
-
-                linechart("CPU占用", CategoryAxis(), NumberAxis()) {
-                    series("com.nio.navi") {
-                        for (item in group.group) {
-                            data(item.updateTime.toString(), item.cpuPercent)
-                        }
-                    }
-                    series("week") {
-                            data("1", 20)
-                            data("10", 30)
-
+            clear()
+            lineChart = linechart("CPU占用", CategoryAxis(), NumberAxis()) {
+                series(data.process) {
+                    for (item in data.group) {
+                        data(item.updateTime.toString(), item.cpuPercent)
                     }
                 }
             }
-            row {
-
-                barchart("multiseries", CategoryAxis(), NumberAxis()) {
-                    multiseries("Portfolio 1", "Portfolio 2") {
-                        data("Jan", 23, 10)
-                        data("Feb", 14, 5)
-                        data("Mar", 15, 8)
-                    }
-                }
-                bubblechart("bubblechart", NumberAxis(), NumberAxis()) {
-                    series("series 1") {
-                        data(1, 1, 1)
-                        data(5, 5, 0.25)
-                    }
-                }
-                areachart("area chart", CategoryAxis(), NumberAxis()) {
-                    series("area 1") {
-                        data("Jan", 10)
-                        data("Feb", 5)
-                        data("Mar", 8)
-                    }
-                    series("area 2") {
-                        data("Jan", 0.5)
-                        data("Feb", 3.25)
-                        data("Mar", 6.75)
-                    }
-                }
-
-                scatterchart("scattered", CategoryAxis(), NumberAxis()) {
-                    series("scatter 1") {
-                        data("jan", 5)
-                        data("feb", 9)
-                    }
-                    series("scatter 2") {
-                        data("jan", 6)
-                        data("feb", .05)
-                        data("mar", 11)
-                    }
-                }
-            }
+            center = lineChart
         }
     }
 }

@@ -7,7 +7,7 @@ import java.io.FileReader
 import java.util.*
 import kotlin.collections.ArrayList
 
-abstract class BaseParser(val filePath: String, val listener: ParseListener?) {
+abstract class BaseParser(private val filePath: String, private val listener: ParseListener?) {
 
     open fun startParse(): List<TopItem> {
         listener?.onParseStart()
@@ -17,15 +17,19 @@ abstract class BaseParser(val filePath: String, val listener: ParseListener?) {
         val totalSize = file.length()
         var currentSize = 0L
         val reader = BufferedReader(FileReader(file))
-        var line: String = ""
-        while (({ line = reader.readLine();line }) != null) {
+        var line = reader.readLine()
+        while (line != null) {
             currentSize += line.length
             var item = doParse(line)
             if (item != null) {
                 list.add(item)
+                listener?.onParseProgress(currentSize, totalSize, item)
             }
-            listener?.onParseProgress(currentSize, totalSize)
+            println(line)
+            val temp = reader.readLine() ?: break
+            line = temp
         }
+        reader.close()
         listener?.onParseEnd(list)
         return list
     }
