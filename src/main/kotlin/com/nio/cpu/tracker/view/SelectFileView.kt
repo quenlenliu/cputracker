@@ -1,12 +1,11 @@
 package com.nio.cpu.tracker.view
 
-import com.nio.cpu.tracker.data.TopItem
+import com.nio.cpu.tracker.parser.BaseParser
 import com.nio.cpu.tracker.parser.ParseListener
-import com.nio.cpu.tracker.parser.ProcessParser
-import com.nio.cpu.tracker.parser.TopParser
+import com.nio.cpu.tracker.parser.impl.ProcessParser
+import com.nio.cpu.tracker.parser.impl.ProcessParserApi28
 import com.nio.cpu.tracker.presenter.MainPresenter
 import javafx.geometry.Pos
-import javafx.scene.Parent
 import javafx.stage.FileChooser
 import tornadofx.*
 import java.io.File
@@ -39,7 +38,10 @@ class SelectFileView(private val presenter: MainPresenter): View("SelectFile") {
                 val file = File(filePath.text.trim())
                 if (isValidFilePath(file)) {
                     println("Start parse: " + file.absolutePath)
-                    val parser = ProcessParser(filePath.text.trim(), presenter)
+                    val parser = getDesireParser(
+                        filePath.text.trim(),
+                        presenter
+                    )
                     runAsync {
                         parser.startParse()
                     }
@@ -50,6 +52,11 @@ class SelectFileView(private val presenter: MainPresenter): View("SelectFile") {
 
             }
         }
+    }
+
+    private fun getDesireParser(filePath: String, listener: ParseListener): BaseParser {
+        return ProcessParserApi28(filePath, listener)
+        //return ProcessParser(filePath, listener)
     }
 
     private fun isValidFilePath(file: File): Boolean {

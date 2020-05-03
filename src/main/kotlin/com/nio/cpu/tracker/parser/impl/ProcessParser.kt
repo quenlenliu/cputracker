@@ -1,9 +1,12 @@
-package com.nio.cpu.tracker.parser
+package com.nio.cpu.tracker.parser.impl
 
 import com.nio.cpu.tracker.data.TopItem
+import com.nio.cpu.tracker.parser.BaseParser
+import com.nio.cpu.tracker.parser.ParseListener
 import java.util.regex.Pattern
 
 class ProcessParser(val filePath: String, val listener: ParseListener): BaseParser(filePath, listener) {
+    private var parseCount = 0L
     //top -m 7 -d 1
     /*
      3217  2   8% S    28 3083028K 669960K  fg system   com.nextev.speech
@@ -36,7 +39,7 @@ class ProcessParser(val filePath: String, val listener: ParseListener): BasePars
             val user = matcher.group(8)
             val processName = matcher.group(9)
 
-            return TopItem(processId, processName, 0, processName, vss, rss, highThreadCpuPercent, System.currentTimeMillis())
+            return TopItem(processId, processName, 0, processName, vss, rss, highThreadCpuPercent, ++parseCount)
         }
         return null
     }

@@ -1,41 +1,53 @@
 package com.nio.cpu.tracker.view
 
-import com.nio.cpu.tracker.data.TopGroup
-import javafx.collections.FXCollections
-import javafx.scene.control.SelectionMode
-import javafx.scene.control.TableCell
+import com.nio.cpu.tracker.data.Process
+import com.nio.cpu.tracker.data.TopItem
+import com.nio.cpu.tracker.viewmodel.MainSceneViewMode
+import javafx.scene.control.TreeItem
+import javafx.scene.control.TreeView
 import tornadofx.*
 
 class SelectGroupView : View("My View") {
-    private val groupData = FXCollections.observableArrayList<SelectTopGroup>()
+    lateinit var mCpuUsageView: TreeView<Any>
     override val root = borderpane() {
         center {
-            for(index in 1 until 10) {
-                val item = TopGroup("com.nio.navi-${index}")
-                item.processId = index
-                groupData.add(SelectTopGroup(false, item.processId, item.process))
-            }
-            vbox {
-                tableview(groupData) {
-                    isEditable = true
-                    readonlyColumn("进程号", SelectTopGroup::processId)
-                    readonlyColumn("进程名", SelectTopGroup::processName)
-                    selectionModel.selectionMode = SelectionMode.SINGLE
-                }
-            }
-        }
-    }
+           mCpuUsageView = treeview<Any> {
+               style {
+                   fontSize = 16.px
+               }
+               root = TreeItem(Process("All Process"))
 
-}
+               cellFormat {
+                   text = when (it) {
+                       is Process -> it.process
+                       is TopItem -> it.threadName
+                       else ->  throw IllegalArgumentException("Invalid value type")
+                   }
 
-class CheckBoxCell() : TableCell<SelectTopGroup, String?>() {
-    private val checkBox = checkbox {  }
-    override fun updateItem(item: String?, empty: Boolean) {
-        super.updateItem(item, empty)
-        if (empty) {
-            graphic = null
-        } else {
-            checkBox.isSelected = false
+               }
+               onUserSelect {
+                   println("onUserSelect: $it")
+                   if (it is TopItem) {
+                       MainSceneViewMode.selectTop.value = it as TopItem
+                   } else if (it is Process){
+                       if (it.threadList.isNotEmpty()) {
+                           MainSceneViewMode.selectTop.value = (it as Process).threadList.first()
+                       }
+                   }
+               }
+
+               populate {parent ->
+                   val value = parent.value
+                   when {
+                       parent == root -> MainSceneViewMode.processGroup
+                       value is Process -> value.threadList
+                       else -> null
+                   }
+               }
+           }
+
+            mCpuUsageView.root.expandTo(1)
         }
+
     }
 }

@@ -1,6 +1,8 @@
-package com.nio.cpu.tracker.parser
+package com.nio.cpu.tracker.parser.impl
 
 import com.nio.cpu.tracker.data.TopItem
+import com.nio.cpu.tracker.parser.BaseParser
+import com.nio.cpu.tracker.parser.ParseListener
 import java.util.regex.Pattern
 
 class TopParser(val filePath: String, val listener: ParseListener): BaseParser(filePath, listener) {

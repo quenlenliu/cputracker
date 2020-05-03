@@ -1,10 +1,9 @@
 package com.nio.cpu.tracker.presenter
 
 import com.nio.cpu.tracker.MainView
-import com.nio.cpu.tracker.data.TopGroup
 import com.nio.cpu.tracker.data.TopItem
 import com.nio.cpu.tracker.parser.ParseListener
-import javafx.application.Platform
+import com.nio.cpu.tracker.viewmodel.MainSceneViewMode
 
 class MainPresenter(val mainView: MainView) : ParseListener {
 
@@ -17,9 +16,7 @@ class MainPresenter(val mainView: MainView) : ParseListener {
     }
 
     override fun onParseEnd(result: List<TopItem>) {
-        Platform.runLater {
-            mainView.updateChartView(TopGroup.group(result, "com.nio.navi"))
-        }
+        MainSceneViewMode.topItemList.clear()
+        MainSceneViewMode.topItemList.addAll(result)
     }
-
 }
