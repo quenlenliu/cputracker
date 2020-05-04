@@ -9,14 +9,17 @@ import javafx.collections.FXCollections
 import javafx.scene.chart.CategoryAxis
 import javafx.scene.chart.LineChart
 import javafx.scene.chart.NumberAxis
+import javafx.scene.chart.XYChart
 import javafx.scene.layout.BorderPane
 import tornadofx.*
 
 open class CpuUsageView(private val presenter: MainPresenter): View("CpuUsage") {
     override val root = BorderPane()
-    lateinit var lineChart: LineChart<String, Number>
+    lateinit var lineChart: LineChart<Number, Number>
 
     protected val mPropertiesPair = FXCollections.observableArrayList<Pair<String,  String>>()
+    protected val mChartViewData = FXCollections.observableArrayList<XYChart.Series<Number, Number>>()
+    protected val mFirstSeriesData = FXCollections.observableArrayList<XYChart.Data<Number, Number>>()
 
 
     init {
@@ -26,6 +29,15 @@ open class CpuUsageView(private val presenter: MainPresenter): View("CpuUsage") 
                 is CpuThread -> updateChartView(newValue)
             }
         })
+        lineChart = linechart(getPrefName(""), NumberAxis(), NumberAxis())
+        lineChart.data = mChartViewData
+
+        val firstSeries = XYChart.Series<Number, Number>()
+        firstSeries.name = getPrefName("Usage")
+        firstSeries.data = mFirstSeriesData
+        mChartViewData.add(firstSeries)
+
+        root.center = lineChart
 
         root.right = tableview(mPropertiesPair) {
             column("Key", String::class) {
@@ -43,7 +55,7 @@ open class CpuUsageView(private val presenter: MainPresenter): View("CpuUsage") 
     }
 
     open fun getPrefName(name: String): String {
-        return "CPU: $name"
+        return "CPU $name"
     }
 
     private fun updateChartView(data: CpuThread) {
@@ -54,28 +66,33 @@ open class CpuUsageView(private val presenter: MainPresenter): View("CpuUsage") 
         updatePropertiesView(dataList)
     }
 
+    private var current = System.currentTimeMillis()
+    protected fun resetCostTime() {
+        current = System.currentTimeMillis()
+    }
+
+    protected fun printCostTime(name: String) {
+        println("$name Cost: ${System.currentTimeMillis() - current}ms")
+    }
+
     private fun updateChartView(data: CpuProcess) {
-        val current = System.currentTimeMillis()
+        resetCostTime()
         val dataList = MainSceneViewMode.topItemList.filter {
             it.processId == data.processId && it.threadId == 0
         }
-        println("Filter Data cost: ${System.currentTimeMillis() - current}ms")
+        printCostTime("Filter Process")
         updateChartView(getPrefName(data.processName), dataList)
         updatePropertiesView(dataList)
-        println("Show Data cost: ${System.currentTimeMillis() - current}ms")
     }
 
     open fun updateChartView(name: String, dataList: List<TopItem>) {
-        with(root) {
-            lineChart = linechart(name, CategoryAxis(), NumberAxis()) {
-                series("Cpu Usage") {
-                    for (item in dataList) {
-                        data(item.updateTime.toString(), item.cpuPercent)
-                    }
-                }
-            }
-            center = lineChart
+        resetCostTime()
+        val dataResult = mutableListOf<XYChart.Data<Number, Number>>()
+        for (item in dataList) {
+            dataResult.add(XYChart.Data(item.updateTime, item.cpuPercent))
         }
+        printCostTime("Generate chart data")
+        mFirstSeriesData.setAll(dataResult)
     }
 
     open fun updatePropertiesView(dataList: List<TopItem>) {
