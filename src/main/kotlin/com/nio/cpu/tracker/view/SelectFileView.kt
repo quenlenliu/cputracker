@@ -23,7 +23,8 @@ class SelectFileView(private val presenter: MainPresenter): View("SelectFile") {
 
         button("Select File") {
             action {
-                val chooseFile = chooseFile("Select File", arrayOf(FileChooser.ExtensionFilter(".txt", mutableListOf("*.txt"))))
+                val chooseFile = chooseFile("Select File", arrayOf(FileChooser.ExtensionFilter(".txt", mutableListOf("*.txt")))
+                        , File("/home/quenlen/Desktop/Top/"), FileChooserMode.Single)
                 if (chooseFile.isNotEmpty()) {
                     filePath.text = chooseFile.first().absolutePath
                 } else {
