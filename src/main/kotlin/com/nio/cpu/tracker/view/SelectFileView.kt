@@ -11,29 +11,28 @@ import tornadofx.*
 import java.io.File
 
 class SelectFileView(private val presenter: MainPresenter): View("SelectFile") {
-
     override val root = hbox {
         style {
             alignment = Pos.CENTER
-            fontSize = Dimension(18.0, Dimension.LinearUnits.pt)
+            fontSize = Dimension(15.0, Dimension.LinearUnits.pt)
             spacing = Dimension(8.0, Dimension.LinearUnits.pt)
             paddingTop = 8.0
             paddingBottom = 8.0
         }
-        val filePath = label ("请选择你的Top文件")
+        val filePath = textfield ("Please select your file")
 
-        button("选择") {
+        button("Select File") {
             action {
                 val chooseFile = chooseFile("Select File", arrayOf(FileChooser.ExtensionFilter(".txt", mutableListOf("*.txt"))))
                 if (chooseFile.isNotEmpty()) {
                     filePath.text = chooseFile.first().absolutePath
                 } else {
-                    filePath.text = "请重新选择！"
+                    filePath.text = "Please reselect your file"
                 }
             }
         }
 
-        button("开始解析") {
+        button("Start Analyze") {
             action {
                 val file = File(filePath.text.trim())
                 if (isValidFilePath(file)) {
@@ -45,7 +44,6 @@ class SelectFileView(private val presenter: MainPresenter): View("SelectFile") {
                     runAsync {
                         parser.startParse()
                     }
-
                 } else {
                     println("File error, can't parse!!!!!!!!!!!")
                 }

@@ -40,8 +40,26 @@ class ProcessParserApi28(val filePath: String, val listener: ParseListener): Bas
             val cpuPercent = matcher.group(9).toFloat()
             val memPercent = matcher.group(10).toFloat()
             val processName = matcher.group(12)
-            return TopItem(processId, processName, 0, processName, 0, 0, cpuPercent, ++parseCount)
+            return TopItem(processId, processName, 0, processName, getByteSize(virt), getByteSize(res), cpuPercent, ++parseCount)
         }
         return null
     }
+
+    private fun getByteSize(sizeLine: String): Int {
+        if (sizeLine.length <= 1) {
+            return 0
+        }
+        val last = sizeLine.last()
+        val size = sizeLine.substring(0, sizeLine.length - 1).toFloat()
+        if (last == 'G') {
+            return (size * 1024 * 1024).toInt()
+        } else if (last == 'M') {
+            return (size * 1024).toInt()
+        } else if (last == 'K') {
+            return size.toInt()
+        } else {
+            return 0
+        }
+    }
+
 }

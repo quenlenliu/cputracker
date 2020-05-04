@@ -1,6 +1,6 @@
 package com.nio.cpu.tracker.viewmodel
 
-import com.nio.cpu.tracker.data.Process
+import com.nio.cpu.tracker.data.CpuProcess
 import com.nio.cpu.tracker.data.TopItem
 import javafx.beans.InvalidationListener
 import javafx.beans.value.ChangeListener
@@ -12,33 +12,22 @@ object MainSceneViewMode {
 
     final val topItemList = FXCollections.observableArrayList<TopItem>()
 
-    final val processGroup = FXCollections.observableArrayList<Process>()
+    final val processGroup = FXCollections.observableArrayList<CpuProcess>()
 
-    final val selectTop = ObservableObject<TopItem>()
+    final val selectTop = ObservableObject<Any>()
 
     init {
-
         topItemList.addListener(ListChangeListener {
             val group = it.list.groupBy { it.processId }
-            val list = ArrayList<Process>(group.size)
+            val list = ArrayList<CpuProcess>(group.size)
             for ((key, item) in group) {
-                val process = Process(key)
+                val process = CpuProcess(key, item.first().processName)
                 process.addThread(item)
                 list.add(process)
             }
             processGroup.setAll(list)
         })
-        /*val testData = ArrayList<TopItem>()
-        for (processId in 1 until 10) {
-            for (threadId in  1 until 10) {
-                val item = TopItem(processId, "$processId", threadId, "$processId-$threadId", 100, 50, (threadId * Math.random() * 10f).toFloat(), threadId.toLong())
-                testData.add(item)
-            }
-        }
-        topItemList.setAll(testData)*/
     }
-
-
 }
 
 class ObservableObject<T>(): ObservableObjectValue<T> {

@@ -4,7 +4,6 @@ import com.nio.cpu.tracker.data.TopItem
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileReader
-import java.util.*
 import kotlin.collections.ArrayList
 
 abstract class BaseParser(private val filePath: String, private val listener: ParseListener?) {
@@ -18,11 +17,13 @@ abstract class BaseParser(private val filePath: String, private val listener: Pa
         var currentSize = 0L
         val reader = BufferedReader(FileReader(file))
         var line = reader.readLine()
+        var preview: TopItem? = null
         while (line != null) {
             currentSize += line.length
             var item = doParse(line)
-            if (item != null) {
+            if (item != null && item.cpuPercent != preview?.cpuPercent) {
                 list.add(item)
+                preview = item
                 listener?.onParseProgress(currentSize, totalSize, item)
             }
             println(line)

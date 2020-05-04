@@ -1,13 +1,13 @@
 package com.nio.cpu.tracker.view
 
-import com.nio.cpu.tracker.data.Process
-import com.nio.cpu.tracker.data.TopItem
+import com.nio.cpu.tracker.data.CpuProcess
+import com.nio.cpu.tracker.data.CpuThread
 import com.nio.cpu.tracker.viewmodel.MainSceneViewMode
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeView
 import tornadofx.*
 
-class SelectGroupView : View("My View") {
+class AllProcessView : View("My View") {
     lateinit var mCpuUsageView: TreeView<Any>
     override val root = borderpane() {
         center {
@@ -15,32 +15,29 @@ class SelectGroupView : View("My View") {
                style {
                    fontSize = 16.px
                }
-               root = TreeItem(Process("All Process"))
+               root = TreeItem(CpuProcess(0, "All Process"))
 
                cellFormat {
                    text = when (it) {
-                       is Process -> it.process
-                       is TopItem -> it.threadName
+                       is CpuProcess -> it.processName
+                       is CpuThread -> it.name
                        else ->  throw IllegalArgumentException("Invalid value type")
                    }
 
                }
                onUserSelect {
                    println("onUserSelect: $it")
-                   if (it is TopItem) {
-                       MainSceneViewMode.selectTop.value = it as TopItem
-                   } else if (it is Process){
-                       if (it.threadList.isNotEmpty()) {
-                           MainSceneViewMode.selectTop.value = (it as Process).threadList.first()
-                       }
+                   if (it is CpuProcess && it.processId == 0) {
+                       return@onUserSelect
                    }
+                   MainSceneViewMode.selectTop.value = it
                }
 
                populate {parent ->
                    val value = parent.value
                    when {
                        parent == root -> MainSceneViewMode.processGroup
-                       value is Process -> value.threadList
+                       value is CpuProcess -> value.threadList
                        else -> null
                    }
                }
