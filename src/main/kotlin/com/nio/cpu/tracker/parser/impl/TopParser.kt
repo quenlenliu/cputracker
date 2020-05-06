@@ -6,7 +6,7 @@ import com.nio.cpu.tracker.parser.ParseListener
 import java.util.regex.Pattern
 
 class TopParser(val filePath: String, val listener: ParseListener): BaseParser(filePath, listener) {
-
+    private var parseCount = 0L
     //top -m 7 -d 2 -t
     /*
      1835  4037  0   4% S 206988K  27320K  fg media    AudioIn_D       /system/bin/mediaserver
@@ -39,7 +39,7 @@ class TopParser(val filePath: String, val listener: ParseListener): BaseParser(f
             val threadName = matcher.group(9)
             val processName = matcher.group(10)
 
-            return TopItem(processId, processName, highThreadId, threadName, vss, rss, highThreadCpuPercent, System.currentTimeMillis())
+            return TopItem(processId, processName, highThreadId, threadName, vss, rss, highThreadCpuPercent, ++parseCount)
         }
         return null
     }

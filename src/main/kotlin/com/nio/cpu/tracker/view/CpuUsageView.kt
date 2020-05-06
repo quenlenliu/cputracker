@@ -78,7 +78,7 @@ open class CpuUsageView(private val presenter: MainPresenter): View("CpuUsage") 
     private fun updateChartView(data: CpuProcess) {
         resetCostTime()
         val dataList = MainSceneViewMode.topItemList.filter {
-            it.processId == data.processId && it.threadId == 0
+            it.processId == data.processId && it.threadName == "com.nio.navi"
         }
         printCostTime("Filter Process")
         updateChartView(getPrefName(data.processName), dataList)
