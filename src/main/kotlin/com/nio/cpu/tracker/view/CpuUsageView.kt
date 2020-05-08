@@ -20,7 +20,7 @@ open class CpuUsageView(private val presenter: MainPresenter): View("CpuUsage") 
     protected val mPropertiesPair = FXCollections.observableArrayList<Pair<String,  String>>()
     protected val mChartViewData = FXCollections.observableArrayList<XYChart.Series<Number, Number>>()
     protected val mFirstSeriesData = FXCollections.observableArrayList<XYChart.Data<Number, Number>>()
-
+    var mFilterRange = LongRange(0, Long.MAX_VALUE)
 
     init {
         MainSceneViewMode.selectTop.addListener(ChangeListener{ _, _, newValue ->
@@ -58,11 +58,30 @@ open class CpuUsageView(private val presenter: MainPresenter): View("CpuUsage") 
         return "CPU $name"
     }
 
+    fun setFilter(range: LongRange) {
+        mFilterRange = range
+        if (mCpuProcess != null) {
+            updateChartView(mCpuProcess!!)
+        } else if (mCpuThread != null) {
+            updateChartView(mCpuThread!!)
+        }
+    }
+
     private fun updateChartView(data: CpuThread) {
+        mCpuThread = data
+        mCpuProcess = null
         val dataList = MainSceneViewMode.topItemList.filter {
             it.processId == data.processId && it.threadId == data.threadId
+                    && mFilterRange.contains(it.updateTime)
         }
-        updateChartView(getPrefName(data.name), dataList)
+        updateChartAndProperties(getPrefName(data.name), dataList)
+    }
+
+    var mCpuThread: CpuThread? = null
+    var mCpuProcess: CpuProcess? = null
+
+    private fun updateChartAndProperties(name: String, dataList: List<TopItem>) {
+        updateChartView(name, dataList)
         updatePropertiesView(dataList)
     }
 
@@ -77,12 +96,14 @@ open class CpuUsageView(private val presenter: MainPresenter): View("CpuUsage") 
 
     private fun updateChartView(data: CpuProcess) {
         resetCostTime()
+        mCpuThread = null
+        mCpuProcess = data
         val dataList = MainSceneViewMode.topItemList.filter {
-            it.processId == data.processId && it.threadName == "com.nio.navi"
+            it.processId == data.processId && (it.threadId == data.processId || it.threadId == 0)
+                    && mFilterRange.contains(it.updateTime)
         }
         printCostTime("Filter Process")
-        updateChartView(getPrefName(data.processName), dataList)
-        updatePropertiesView(dataList)
+        updateChartAndProperties(getPrefName(data.processName), dataList)
     }
 
     open fun updateChartView(name: String, dataList: List<TopItem>) {

@@ -19,4 +19,9 @@ class MainPresenter(val mainView: MainView) : ParseListener {
         MainSceneViewMode.topItemList.clear()
         MainSceneViewMode.topItemList.addAll(result)
     }
+
+    fun setFilter(range: LongRange) {
+        mainView.updateFilter(range)
+    }
+
 }

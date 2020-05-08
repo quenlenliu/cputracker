@@ -27,12 +27,16 @@ class SelectFileView(private val presenter: MainPresenter): View("SelectFile") {
     override val root = hbox {
         style {
             alignment = Pos.CENTER
-            fontSize = Dimension(15.0, Dimension.LinearUnits.pt)
-            spacing = Dimension(8.0, Dimension.LinearUnits.pt)
+            fontSize = 15.px
+            spacing = 8.px
             paddingTop = 8.0
             paddingBottom = 8.0
         }
-        val filePath = textfield ("Please select your file")
+        val filePath = label ("Please select your file") {
+            style {
+                fontSize = 12.px
+            }
+        }
 
         button("Select File") {
             action {
